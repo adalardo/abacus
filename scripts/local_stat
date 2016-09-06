@@ -12,5 +12,5 @@ echo -n "		"
 # Jobs
 echo -n "Jobs from: "
 MYTTY=$(tty)
-ps aux | grep -v "${MYTTY#/dev/}" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'
+ps aux | grep -v "${MYTTY#/dev/}" | grep -v "systemd \-\-user" | grep -v "\(sd-pam\)" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'
 
