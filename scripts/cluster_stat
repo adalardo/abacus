@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ "$1" == "-u" ]]; then
+	for i in `seq -w 0 23`; do
+                echo "abacus00$i:		$(ssh -t abacus00$i /usr/local/bin/local_stat 2>/dev/null)" &
+	done
+else
+	for i in `seq -w 0 23`; do
+                echo "abacus00$i:		$(ssh -t abacus00$i /usr/local/bin/local_stat 2>/dev/null)"
+        done
+fi
