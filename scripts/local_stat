@@ -1,6 +1,6 @@
 #!/bin/sh
 ## CPU usage
-echo -n "CPU use: $(top -bn 2 -d 0.1 | grep "^\%*Cpu" | tail -1 | awk '{print $2 + $4 + $6}')%";
+echo -n "CPU use: $(top -bn 2 -d 1 | grep "^\%*Cpu" | tail -1 | awk '{print $2 + $4 + $6}')%";
 echo -n "		"
 ## Memory
 total=`grep MemTotal /proc/meminfo | awk '{print $2;}'`
