@@ -1,0 +1,5 @@
+DEFAULT linux
+
+LABEL linux
+KERNEL vmlinuz-4.4.0-31-generic
+APPEND root=/dev/nfs initrd=initrd.img-4.4.0-31-generic rw nfsroot=10.1.1.1:/var/lib/nfsroot,rw ip=dhcp rw net.ifnames=0
