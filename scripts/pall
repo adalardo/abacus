@@ -1,0 +1,29 @@
+#!/bin/bash
+
+function parse_input(){
+    # adapted from recipe by Tuxdude at http://stackoverflow.com/questions/15313848/parse-and-expand-interval
+    result_str=""
+    for num in $(tr ',' ' ' <<< "$@"); do
+        if [[ "$num" == *-* ]]; then
+            res=$(seq $(sed -n 's#\([0-9]\+\)-\([0-9]\+\).*#\1 \2#p' <<< "$num"))
+        else
+            res="$num"
+        fi
+        result_str="$result_str $res"
+    done
+    echo ${result_str:1}
+}
+
+if [ $1 == "-a" ]; then
+    micros=`seq 0 23`
+else
+    micros=`parse_input $1`
+fi
+
+for micro in $micros; do
+    # zero-padding
+    micro=`printf '%02d' $micro`
+    prefix=$'\e[32;1m'${micro}$'\e[0m'
+    ssh -T "abacus00${micro}" "${@:2}" | sed -e "s/^/$prefix /" - &
+done
+
