@@ -16,17 +16,17 @@ Usados para testar a paralelização de tarefas no cluster
 
 Arquivos de configuração padrão, substituir or originais
 
-### /etc/
+### /etc-nodes/
 
 *Instalar em:* nós
 *Local:* /etc/
 
-### /pxelinux.cfg/default
+### /pxelinux.cfg/
 
 *Instalar em:* master
 *Local:* /var/lib/tftpboot/pxelinux.cfg/
 
-### dnsmasq.conf
+### /etc-master/
 
 *Instalar em:* master
 *Local:* /etc/
