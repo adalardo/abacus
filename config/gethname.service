@@ -1,0 +1,10 @@
+# Para instalação em /lib/systemd/system/gethname.service 
+[Unit]
+Description=Initializes hostname based on IP address (andrechalom 10/11/2016)
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/gethname
+
+[Install]
+WantedBy=multi-user.target
