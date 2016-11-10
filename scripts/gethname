@@ -1,0 +1,7 @@
+#!/bin/sh -
+MYIP=`ifconfig | head -2 | tail -1 | cut -c 29-30`
+hostname "abacus00$MYIP"
+echo "Hostname changed"
+## Turns on WOL support
+ethtool -s eth0 wol g
+ethtool -s eth1 wol g
