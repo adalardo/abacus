@@ -1,19 +1,14 @@
 #!/bin/bash
 
-# list of MACs, starting from 0
-function get_MAC_list(){
-    MAC_list=""
-    for i in $@; do
-        # zero-padding
-        i=`printf '%02d' $i`
-        # this assumes a single "real" network adapter
-        mac=`ssh "abacus00${i}" 'ifconfig | grep HWaddr | tr -s " " | cut -d" " -f5'`
-        MAC_list="$MAC_list $mac"
-    done
-    echo $MAC_list
-}
-#MAC_list=("e0:cb:4e:27:ee:cd" "e0:69:95:fb:b1:dc" "e0:cb:4e:27:e9:87" "e0:cb:4e:27:ff:f5" "e0:cb:4e:28:00:75" "e0:cb:4e:27:e9:9f" "e0:cb:4e:27:fd:d0")
 subnet="10.1.1.255"
+
+# Lista dos MAC addresses, começando pelo nó 00. Não coletamos ainda o MAC do nó 19
+MAC_list=("e0:cb:4e:27:ee:cd" "e0:69:95:fb:b1:dc" "e0:cb:4e:27:e9:87" "e0:cb:4e:27:ff:f5" "e0:cb:4e:28:00:75" "e0:cb:4e:27:e9:9f" "e0:cb:4e:27:fd:d0" "e0:cb:4e:27:e9:9c" "d8:cb:8a:30:27:d2" "d8:cb:8a:30:29:4a" "d8:cb:8a:30:27:b9" "d8:cb:8a:30:29:01" "d8:cb:8a:30:29:2b" "d8:cb:8a:30:29:27" "d8:cb:8a:30:27:bf" "d8:cb:8a:30:27:c1" "00:1c:c0:80:cb:11" "00:1c:c0:7f:eb:4d" "00:1c:c0:80:d1:0c" "00:00:00:00:00:00" "00:1c:c0:7f:ea:01" "00:1c:c0:7f:ee:6c" "00:1c:c0:bd:dc:89" "00:1c:c0:7f:f9:08")
+
+function help(){
+    echo "O script wake envia um comando para ligar os nós através da rede. Especifique um ou mais nós"
+    exit
+}
 
 function parse_input(){
     # adapted from recipe by Tuxdude at http://stackoverflow.com/questions/15313848/parse-and-expand-interval
@@ -29,16 +24,14 @@ function parse_input(){
     echo ${result_str:1}
 }
 
-machines=`parse_input $@`
-if [ -z $MAC_list ]; then
-    MAC_list=`get_MAC_list $machines`
-    echo "No MAC list present, please add:"
-    echo "\"${MAC_list}\"" | sed -e 's/ /" "/g' -
-    exit 1
+if [[ "$1" == "" ]] || [[ "$1" == "-h" ]]; then
+	help
 fi
+
+machines=`parse_input $@`
 macs=""
 for i in $machines; do
     macs="$macs ${MAC_list[i]}"
 done
 echo "Waking up machines ${machines}..."
-wol -i $subnet $macs
+wakeonlan -i $subnet $macs
