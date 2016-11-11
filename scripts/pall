@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# Determina se esse script foi invocado como "all" ou "pall"
+if [[ `basename $0` == "pall" ]]; then
+    PARALLEL=1
+else
+    PARALLEL=0
+fi
+
+function help(){
+    echo "O script all/pall pode ser utilizado para executar o mesmo comando em diversos nós"
+    echo "Use 'all' para esperar o fim de cada execução antes de iniciar o próximo computador"
+    echo "Use 'pall' para executar em todos os computadores paralelamente"
+    echo "O primeiro argumento deve indicar o número dos nós que irão receber os comandos"
+    echo "Você pode usar - para indicar um intervalo, vírgula para indicar uma lista"
+    echo "Alternativamente, use -a para enviar o comando para todos os nós"
+    echo ""
+    echo "Exemplos:"
+    echo "all -a echo 'oi' # Todos os computadores dizem oi"
+    echo "pall -a echo 'oi' # A mesma coisa, mas em paralelo"
+    echo "all 0,2,4-7 echo 'oi' # Os computadores 0, 2 e de 4 até 7 dizem oi"
+    exit 0;
+}
+
 function parse_input(){
     # adapted from recipe by Tuxdude at http://stackoverflow.com/questions/15313848/parse-and-expand-interval
     result_str=""
@@ -14,6 +36,18 @@ function parse_input(){
     echo ${result_str:1}
 }
 
+# Flag -h ou nenhum argumento encaminha para help
+if [[ "$1" == "-h" ]]  || [[ "$1" == "" ]]; then
+    help
+fi
+
+PARSEERROR=`echo $1 | grep -P "[^\d,-]"`
+if [[ "$PARSEERROR" != "" ]] && [[ "$PARSEERROR" !=  "-a" ]]; then
+    echo "Erro interpretando o argumento '$PARSEERROR'"
+    echo ""
+    help
+fi
+
 if [ $1 == "-a" ]; then
     micros=`seq 0 23`
 else
@@ -23,7 +57,12 @@ fi
 for micro in $micros; do
     # zero-padding
     micro=`printf '%02d' $micro`
-    prefix=$'\e[32;1m'${micro}$'\e[0m'
-    ssh -T "abacus00${micro}" "${@:2}" | sed -e "s/^/$prefix /" - &
+	prefix=$'\e[32;1m'${micro}$'\e[0m:'
+	if [[ "$PARALLEL" == 1 ]]; then 
+		ssh -T "abacus00${micro}" "${@:2}" | sed -e "s/^/$prefix /" - &
+	else
+		echo -ne "$prefix "
+    	ssh -t "abacus00${micro}" "${@:2}" 2>&1 | sed "s/Connection to abacus.* closed\.//"
+	fi
 done
 
