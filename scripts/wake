@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# list of MACs, starting from 0
+function get_MAC_list(){
+    MAC_list=""
+    for i in $@; do
+        # zero-padding
+        i=`printf '%02d' $i`
+        # this assumes a single "real" network adapter
+        mac=`ssh "abacus00${i}" 'ifconfig | grep HWaddr | tr -s " " | cut -d" " -f5'`
+        MAC_list="$MAC_list $mac"
+    done
+    echo $MAC_list
+}
+#MAC_list=("e0:cb:4e:27:ee:cd" "e0:69:95:fb:b1:dc" "e0:cb:4e:27:e9:87" "e0:cb:4e:27:ff:f5" "e0:cb:4e:28:00:75" "e0:cb:4e:27:e9:9f" "e0:cb:4e:27:fd:d0")
+subnet="10.1.1.255"
+
+function parse_input(){
+    # adapted from recipe by Tuxdude at http://stackoverflow.com/questions/15313848/parse-and-expand-interval
+    result_str=""
+    for num in $(tr ',' ' ' <<< "$@"); do
+        if [[ "$num" == *-* ]]; then
+            res=$(seq $(sed -n 's#\([0-9]\+\)-\([0-9]\+\).*#\1 \2#p' <<< "$num"))
+        else
+            res="$num"
+        fi
+        result_str="$result_str $res"
+    done
+    echo ${result_str:1}
+}
+
+machines=`parse_input $@`
+if [ -z $MAC_list ]; then
+    MAC_list=`get_MAC_list $machines`
+    echo "No MAC list present, please add:"
+    echo "\"${MAC_list}\"" | sed -e 's/ /" "/g' -
+    exit 1
+fi
+macs=""
+for i in $machines; do
+    macs="$macs ${MAC_list[i]}"
+done
+echo "Waking up machines ${machines}..."
+wol -i $subnet $macs
