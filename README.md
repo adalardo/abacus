@@ -1,5 +1,5 @@
 # abacus
-Documentação e scripts de administração do cluster Abacus
+Documentação e scripts de administração do cluster *abacus*. Veja a documentação na nossa [Wiki](https://github.com/lageIBUSP/abacus/wiki/).
 
 ## scripts
 
