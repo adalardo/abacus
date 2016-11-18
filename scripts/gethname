@@ -5,3 +5,4 @@ echo "Hostname changed"
 ## Turns on WOL support
 ethtool -s eth0 wol g
 ethtool -s eth1 wol g
+ethtool -s eth2 wol g
