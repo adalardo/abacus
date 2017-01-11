@@ -10,7 +10,8 @@ cache=`grep "^Cache" /proc/meminfo | awk '{print $2;}'`
 echo -n "Mem use: $(echo $total $free $buffer $cache | awk '{printf("%5.1f", 100*($1-$2-$3-$4)/$1)}')%";
 echo -n "		"
 # Jobs
-echo -n "Jobs from: "
 MYTTY=$(tty)
-ps aux | grep -v "${MYTTY#/dev/}" | grep -v "systemd \-\-user" | grep -v "\(sd-pam\)" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'
-
+job=`ps aux | grep -v "${MYTTY#/dev/}" | grep -v "systemd \-\-user" | grep -v "\(sd-pam\)" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'`
+if [ "$job" != "" ]; then
+	echo -n "Jobs from: $job"
+fi

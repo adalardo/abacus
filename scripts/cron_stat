@@ -14,7 +14,4 @@ down=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", 
 sleep 1
 nup=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
 ndown=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
-echo -n "; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` ; "
-# Jobs
-ps aux | grep -v "systemd \-\-user" | grep -v "\(sd-pam\)" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'
-
+echo "; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` "
