@@ -1,0 +1,20 @@
+#!/bin/sh
+echo -n `date +"%Y-%m-%d %H:%M:%S"`
+## CPU usage
+echo -n "; $(top -bn 2 -d 1 | grep "^\%*Cpu" | tail -1 | awk '{printf "%5.1f", $2 + $4 + $6}')";
+## Memory
+total=`grep MemTotal /proc/meminfo | awk '{print $2;}'`
+free=`grep MemFree /proc/meminfo | awk '{print $2;}'`
+buffer=`grep Buffers /proc/meminfo | awk '{print $2;}'`
+cache=`grep "^Cache" /proc/meminfo | awk '{print $2;}'`
+echo -n "; $(echo $total $free $buffer $cache | awk '{printf("%5.1f", 100*($1-$2-$3-$4)/$1)}')";
+# Network
+up=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
+down=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
+sleep 1
+nup=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
+ndown=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
+echo -n "; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` ; "
+# Jobs
+ps aux | grep -v "systemd \-\-user" | grep -v "\(sd-pam\)" | awk '{ print $1 }' | sed '1 d' | sort | uniq | perl -e 'for (<>) { chomp; $u = ( getpwnam($_) )[2]; print $_, "\n" if ( ( $u >= 1000 ) && ( $_ =~ /[[:alpha:]]/ && $_ ne "nobody" ) ) }' | sed ':a;N;$!ba;s/\n/ /g'
+
