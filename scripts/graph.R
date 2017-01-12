@@ -4,7 +4,7 @@ library(chron)
 ##### CONFIGURATION
 TOL = 5 / (60 * 24) # How many minutes with no activity is considered offline
 DAYS = 1 # How many days should be plotted?
-MAXNET = 2e6 # Max internet speed
+MAXNET = 6e6 # Max internet speed
 
 ### Helper functions here
 as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
@@ -52,8 +52,8 @@ onePlot = function(x, which) { # Uses global "breaks, start, now"
     }
 }
 ## Read data file
-x = read.csv("../cron.log", header=FALSE, sep=";", as.is=TRUE)
-names(x) = c("Hora", "CPU", "Memory", "Download", "Upload", "Users")
+x = read.csv("stat.log", header=FALSE, sep=";", as.is=TRUE)
+names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
 x$Hora = as.chron(x$Hora)
 now = as.chron(Sys.time())
 start = now - DAYS

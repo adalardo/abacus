@@ -8,10 +8,11 @@ free=`grep MemFree /proc/meminfo | awk '{print $2;}'`
 buffer=`grep Buffers /proc/meminfo | awk '{print $2;}'`
 cache=`grep "^Cache" /proc/meminfo | awk '{print $2;}'`
 echo -n "; $(echo $total $free $buffer $cache | awk '{printf("%5.1f", 100*($1-$2-$3-$4)/$1)}')";
-# Network
-up=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
-down=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
+# Network ## Especifica qual interface deve ser pedida (ver issue #16)
+if=`/sbin/ifconfig | grep "eth|wlan" | cut -d ' ' -f 1`
+up=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
+down=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
 sleep 1
-nup=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
-ndown=`/sbin/ifconfig | grep RX | tail -1 | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
+nup=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 2 | awk '{printf("%d", $1)}'`
+ndown=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 3 | awk '{printf("%d", $1)}'`
 echo "; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` "
