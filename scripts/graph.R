@@ -3,8 +3,8 @@ library(chron)
 
 ##### CONFIGURATION
 TOL = 5 / (60 * 24) # How many minutes with no activity is considered offline
-DAYS = 1 # How many days should be plotted?
-MAXNET = 6e6 # Max internet speed
+DAYS = 0.05 # How many days should be plotted?
+MAXNET = 1e7 # Max internet speed (bytes/sec)
 
 ### Helper functions here
 as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
@@ -33,7 +33,7 @@ onePlot = function(x, which) { # Uses global "breaks, start, now"
         idx = breaks[i]
         # CASE no breaks
         if (length(breaks)==0) {
-            lines(x$Hora, x[[which]])
+            lines(x$Hora, x[[which]], col='cornflowerblue')
             break
         }
         # There ARE breaks
@@ -58,6 +58,7 @@ x$Hora = as.chron(x$Hora)
 now = as.chron(Sys.time())
 start = now - DAYS
 x = subset(x, Hora > start)
+MAXNET = max(MAXNET, max(x$Download))
 x$Download = x$Download / MAXNET * 100
 x$Upload = x$Upload / MAXNET * 100
 horas = c(start, x$Hora, now)
