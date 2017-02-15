@@ -1,13 +1,13 @@
 #!/bin/sh
-echo -n `date +"%Y-%m-%d %H:%M:%S"`
+OUTPUT=`date +"%Y-%m-%d %H:%M:%S"`
 ## CPU usage
-echo -n "; $(top -bn 2 -d 1 | grep "^\%*Cpu" | tail -1 | awk '{printf "%5.1f", $2 + $4 + $6}')";
+OUTPUT="${OUTPUT}; $(top -bn 2 -d 1 | grep "^\%*Cpu" | tail -1 | awk '{printf "%5.1f", $2 + $4 + $6}')"
 ## Memory
 total=`grep MemTotal /proc/meminfo | awk '{print $2;}'`
 free=`grep MemFree /proc/meminfo | awk '{print $2;}'`
 buffer=`grep Buffers /proc/meminfo | awk '{print $2;}'`
 cache=`grep "^Cache" /proc/meminfo | awk '{print $2;}'`
-echo -n "; $(echo $total $free $buffer $cache | awk '{printf("%5.1f", 100*($1-$2-$3-$4)/$1)}')";
+OUTPUT="${OUTPUT}; $(echo $total $free $buffer $cache | awk '{printf("%5.1f", 100*($1-$2-$3-$4)/$1)}')";
 # Network ## Especifica qual interface deve ser pedida (ver issue #16)
 if=`/sbin/ifconfig | grep eth | cut -d ' ' -f 1 | tail -1`
 up=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 2 | cut -d ' ' -f 1`
@@ -15,4 +15,4 @@ down=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 3 | cut -d ' ' -f 1`
 sleep 1
 nup=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 2 | cut -d ' ' -f 1`
 ndown=`/sbin/ifconfig $if | grep "RX bytes" | cut -d ":" -f 3 | cut -d ' ' -f 1`
-echo "; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` "
+echo "${OUTPUT}; `echo $nup - $up | /usr/bin/bc` ; `echo $ndown - $down | /usr/bin/bc` "

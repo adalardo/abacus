@@ -3,8 +3,10 @@ library(chron)
 
 ##### CONFIGURATION
 TOL = 5 / (60 * 24) # How many minutes with no activity is considered offline
-DAYS = 0.05 # How many days should be plotted?
+DAYS = 0.5 # How many days should be plotted?
 MAXNET = 1e7 # Max internet speed (bytes/sec)
+now = as.chron(Sys.time())
+start = now - DAYS
 
 ### Helper functions here
 as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
@@ -18,6 +20,8 @@ as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
     thetimes
 }
 onePlot = function(x, which) { # Uses global "breaks, start, now"
+	horas = c(start, x$Hora, now)
+	breaks = which(diff(horas) > TOL)
     # Plot Structure
     plot(x$Hora, x[[which]], type='n', las=1, bty = 'n',
          xlim= c(start, now), xlab = "Data/Hora",
@@ -51,22 +55,29 @@ onePlot = function(x, which) { # Uses global "breaks, start, now"
               col='cornflowerblue')
     }
 }
-## Read data file
-x = read.csv("stat.log", header=FALSE, sep=";", as.is=TRUE)
-names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
-x$Hora = as.chron(x$Hora)
-now = as.chron(Sys.time())
-start = now - DAYS
-x = subset(x, Hora > start)
-MAXNET = max(MAXNET, max(x$Download))
-x$Download = x$Download / MAXNET * 100
-x$Upload = x$Upload / MAXNET * 100
-horas = c(start, x$Hora, now)
-breaks = which(diff(horas) > TOL)
+## Read data file 
+fourPlots = function(hostname) {
+	x = read.csv(paste0("/var/log/",hostname,"/stat.log"), header=FALSE, sep=";", as.is=TRUE)
+	names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
+	### TEMPORARY FIX
+	x = x[3000:3878, ] 
+	x$Hora = as.chron(x$Hora)
+	x = subset(x, Hora > start)
+	MAXNET = max(MAXNET, max(x$Download))
+	x$Download = x$Download / MAXNET * 100
+	x$Upload = x$Upload / MAXNET * 100
+	# Do the actual plotting
+	png(paste0(hostname,".png"))
+	par(mfrow=c(2,2))
+	onePlot(x, "CPU")
+	onePlot(x, "Memory")
+	onePlot(x, "Download")
+	onePlot(x, "Upload")
+	dev.off()
+}
 
-# Do the actual plotting
-par(mfrow=c(2,2))
-onePlot(x, "CPU")
-onePlot(x, "Memory")
-onePlot(x, "Download")
-onePlot(x, "Upload")
+for (i in 0:23) {
+	name = paste0("abacus",sprintf("%04d", i))
+	print(name)
+#	fourPlots(name)
+}
