@@ -1,15 +1,20 @@
+#### ESTE SCRIPT SOH DEVE SER RODADO EM UMA DAS MAQUINAS:
+if (system('uname -n', intern=TRUE) != "abacus0000") quit("no");
+
+#### O output de gráficos deve ser feito no seguinte diretório:
+setwd("/var/www/stats")
+
 # Load libraries
 library(chron)
 
 ##### CONFIGURATION
 TOL = 5 / (60 * 24) # How many minutes with no activity is considered offline
-DAYS = 0.5 # How many days should be plotted?
+DAYS = 2 # How many days should be plotted?
 MAXNET = 1e7 # Max internet speed (bytes/sec)
-now = as.chron(Sys.time())
-start = now - DAYS
+SIZE = 720 # Pixels for images
 
 ### Helper functions here
-as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
+my.as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
     if("POSIXt" %in% class(data))
         data = as.character(data)
     thedates = t(as.data.frame(strsplit(data,' ')))
@@ -19,7 +24,12 @@ as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
                      format=format) 
     thetimes
 }
-onePlot = function(x, which) { # Uses global "breaks, start, now"
+
+# Date and time settings
+now = my.as.chron(Sys.time())
+start = now - DAYS
+
+onePlot = function(x, which) { # Uses global "start, now"
 	horas = c(start, x$Hora, now)
 	breaks = which(diff(horas) > TOL)
     # Plot Structure
@@ -59,15 +69,13 @@ onePlot = function(x, which) { # Uses global "breaks, start, now"
 fourPlots = function(hostname) {
 	x = read.csv(paste0("/var/log/",hostname,"/stat.log"), header=FALSE, sep=";", as.is=TRUE)
 	names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
-	### TEMPORARY FIX
-	x = x[3000:3878, ] 
-	x$Hora = as.chron(x$Hora)
+	x$Hora = my.as.chron(x$Hora)
 	x = subset(x, Hora > start)
 	MAXNET = max(MAXNET, max(x$Download))
 	x$Download = x$Download / MAXNET * 100
 	x$Upload = x$Upload / MAXNET * 100
 	# Do the actual plotting
-	png(paste0(hostname,".png"))
+	png(paste0(hostname,".png"), SIZE, SIZE)
 	par(mfrow=c(2,2))
 	onePlot(x, "CPU")
 	onePlot(x, "Memory")
@@ -79,5 +87,5 @@ fourPlots = function(hostname) {
 for (i in 0:23) {
 	name = paste0("abacus",sprintf("%04d", i))
 	print(name)
-#	fourPlots(name)
+	fourPlots(name)
 }
