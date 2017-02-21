@@ -1,5 +1,5 @@
 #### ESTE SCRIPT SOH DEVE SER RODADO EM UMA DAS MAQUINAS:
-if (system('uname -n', intern=TRUE) != "abacus0000") quit("no");
+if (system('uname -n', intern=TRUE) != "abacus0023") quit("no");
 
 #### O output de gráficos deve ser feito no seguinte diretório:
 setwd("/var/www/stats")
@@ -15,6 +15,7 @@ SIZE = 720 # Pixels for images
 
 ### Helper functions here
 my.as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
+    if(length(data) == 0) return (chron())
     if("POSIXt" %in% class(data))
         data = as.character(data)
     thedates = t(as.data.frame(strsplit(data,' ')))
@@ -67,7 +68,19 @@ onePlot = function(x, which) { # Uses global "start, now"
 }
 ## Read data file 
 fourPlots = function(hostname) {
-	x = read.csv(paste0("/var/log/",hostname,"/stat.log"), header=FALSE, sep=";", as.is=TRUE)
+    # Reads the last log
+    lastw = tryCatch( {
+    	read.csv(paste0("/var/log/",hostname,"/stat.log.1"), header=FALSE, sep=";", as.is=TRUE)
+      }, error = function(e) return (
+          data.frame(Hora=character(0),CPU=numeric(0),Memory=numeric(0),Download=numeric(0), Upload=numeric(0), stringsAsFactors=FALSE) 
+    ))
+    # Reads the current log
+    curw = tryCatch( {
+    	read.csv(paste0("/var/log/",hostname,"/stat.log"), header=FALSE, sep=";", as.is=TRUE)
+      }, error = function(e) return (
+          data.frame(Hora=character(0),CPU=numeric(0),Memory=numeric(0),Download=numeric(0), Upload=numeric(0), stringsAsFactors=FALSE) 
+    ))
+	x = rbind(lastw, curw)
 	names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
 	x$Hora = my.as.chron(x$Hora)
 	x = subset(x, Hora > start)
