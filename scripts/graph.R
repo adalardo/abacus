@@ -1,5 +1,5 @@
 #### ESTE SCRIPT SOH DEVE SER RODADO EM UMA DAS MAQUINAS:
-if (system('uname -n', intern=TRUE) != "abacus0023") quit("no");
+#if (system('uname -n', intern=TRUE) != "abacus0023") quit("no");
 
 #### O output de gráficos deve ser feito no seguinte diretório:
 setwd("/var/www/stats")
@@ -12,6 +12,8 @@ TOL = 5 / (60 * 24) # How many minutes with no activity is considered offline
 DAYS = 2 # How many days should be plotted?
 MAXNET = 1e7 # Max internet speed (bytes/sec)
 SIZE = 720 # Pixels for images
+FG = "#202020" # Foreground color
+BG = "#ddeedd" # Background color
 
 ### Helper functions here
 my.as.chron <- function(data, format=c('y-m-d', 'h:m:s')) {
@@ -89,7 +91,7 @@ fourPlots = function(hostname) {
 	x$Upload = x$Upload / MAXNET * 100
 	# Do the actual plotting
 	png(paste0(hostname,".png"), SIZE, SIZE)
-	par(mfrow=c(2,2))
+	par(mfrow=c(2,2), bg=BG, fg=FG, col.axis=FG, col.lab=FG, col.main=FG)
 	onePlot(x, "CPU")
 	onePlot(x, "Memory")
 	onePlot(x, "Download")
