@@ -1,5 +1,5 @@
 #### ESTE SCRIPT SOH DEVE SER RODADO EM UMA DAS MAQUINAS:
-#if (system('uname -n', intern=TRUE) != "abacus0023") quit("no");
+if (system('uname -n', intern=TRUE) != "abacus0015") quit("no");
 
 #### O output de gráficos deve ser feito no seguinte diretório:
 setwd("/var/www/stats")
@@ -86,7 +86,7 @@ fourPlots = function(hostname) {
 	names(x) = c("Hora", "CPU", "Memory", "Download", "Upload")
 	x$Hora = my.as.chron(x$Hora)
 	x = subset(x, Hora > start)
-	MAXNET = max(MAXNET, max(x$Download))
+	MAXNET = max(MAXNET, max(x$Download, na.rm=TRUE))
 	x$Download = x$Download / MAXNET * 100
 	x$Upload = x$Upload / MAXNET * 100
 	# Do the actual plotting
